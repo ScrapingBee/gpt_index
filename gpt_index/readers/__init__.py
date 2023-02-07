@@ -31,6 +31,7 @@ from gpt_index.readers.weaviate.reader import WeaviateReader
 from gpt_index.readers.web import (
     BeautifulSoupWebReader,
     RssReader,
+    ScrapingBeeReader,
     SimpleWebPageReader,
     TrafilaturaWebReader,
 )
@@ -60,4 +61,5 @@ __all__ = [
     "TwitterTweetReader",
     "ObsidianReader",
     "MboxReader",
+    "ScrapingBeeReader"
 ]

@@ -3,6 +3,7 @@ import logging
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from langchain.utilities import RequestsWrapper
+from scrapingbee import ScrapingBeeClient
 
 from gpt_index.readers.base import BaseReader
 from gpt_index.readers.schema.base import Document
@@ -195,6 +196,64 @@ class BeautifulSoupWebReader(BaseReader):
                 data = soup.getText()
 
             documents.append(Document(data, extra_info=extra_info))
+
+        return documents
+
+
+class ScrapingBeeReader(BaseReader):
+    """Web page reader using ScrapingBee web scraping API.
+
+    Reads pages from the web.
+
+    Args:
+        api_key (str): ScrapingBee API key.
+        render_js (bool): Whether to render JavaScript.
+        scrapingbee_params (Optional[Dict[str, Any]]): Additional parameters to pass to the ScrapingBee API
+        html_to_text (bool): Whether to convert HTML to text.
+            Requires `html2text` package.
+
+    """
+
+    def __init__(self, api_key: str, render_js: bool = False, scrapingbee_params: Dict[str, Any] = None, html_to_text: bool = False, ) -> None:
+        """Initialize with parameters."""
+        if not scrapingbee_params:
+            scrapingbee_params = {}
+        try:
+            import html2text  # noqa: F401
+        except ImportError:
+            raise ValueError(
+                "`html2text` package not found, please run `pip install html2text`"
+            )
+        self._api_key = api_key
+        self._render_js = render_js
+        self._scrapingbee_params = scrapingbee_params
+        self._html_to_text = html_to_text
+
+    def load_data(self, urls: List[str]) -> List[Document]:
+        """Load data from the input directory.
+
+        Args:
+            urls (List[str]): List of URLs to scrape.
+
+        Returns:
+            List[Document]: List of documents.
+
+        """
+        if not isinstance(urls, list):
+            raise ValueError("urls must be a list of strings.")
+        client = ScrapingBeeClient(api_key=self._api_key)
+        documents = []
+        for url in urls:
+            response = client.get(url, {
+                'render_js': self._render_js,
+                **self._scrapingbee_params,
+            })
+            if self._html_to_text:
+                import html2text
+
+                response = html2text.html2text(response.text)
+
+            documents.append(Document(response))
 
         return documents
 

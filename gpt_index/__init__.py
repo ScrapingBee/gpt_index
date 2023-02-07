@@ -68,6 +68,7 @@ from gpt_index.readers import (
     PineconeReader,
     QdrantReader,
     RssReader,
+    ScrapingBeeReader,
     SimpleDirectoryReader,
     SimpleMongoReader,
     SimpleWebPageReader,
@@ -137,5 +138,6 @@ __all__ = [
     "QueryMode",
     "IndexStructType",
     "TwitterTweetReader",
+    "ScrapingBeeReader",
     "download_loader",
 ]
